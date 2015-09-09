@@ -3,7 +3,7 @@ module.exports = {
   development: {
     client: 'mysql',
     connection: {
-      database: 'smstudios_db',
+      database: 'mealenders_db',
       user:  'root',
       password: ''
     },

@@ -20,13 +20,8 @@ module.exports = function () {
   app.use('/', express.static(process.env.CLIENT_FILES));
 
   /* Required Routes */
-  require('../routes/emailList.routes')(app);
   require('../routes/auth.routes')(app);
-  require('../routes/talent.routes')(app);
-  require('../routes/credit.routes')(app);
-  require('../routes/contact.routes')(app);
-  require('../routes/role.routes')(app);
-  require('../routes/genre.routes')(app);
+  require('../routes/customer.routes')(app);
   require('../routes/redirect.routes')(app);
   
   /* Redirect all bad routes to landing page */

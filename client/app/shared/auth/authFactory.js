@@ -12,7 +12,7 @@
             password: password
           }
         }).then(function(res) {
-            window.localStorage.smstudiosJwtToken = res.data.token;
+            window.localStorage.mealendersJwtToken = res.data.token;
             $state.go('home');
         }, function() {
             return "Invalid credentials";
@@ -22,19 +22,19 @@
       /* Returns true or false depending on whether the current user is logged in. A user is logged in */
       loggedIn: function(callback) {
         // if no token exists in local storage, user is not logged in
-        if (!window.localStorage.smstudiosJwtToken) {
+        if (!window.localStorage.mealendersJwtToken) {
           callback(false);
         } else {
           $http({
             method: 'POST',
             url: 'api/auth/validate',
             data: {
-              token: window.localStorage.smstudiosJwtToken
+              token: window.localStorage.mealendersJwtToken
             }
           }).then(function(res) {
             // If token is invalid, delete it
             if (!res.data) {
-              delete window.localStorage.smstudiosJwtToken;
+              delete window.localStorage.mealendersJwtToken;
             }
             callback(res.data);
           });
@@ -43,7 +43,7 @@
 
       /* When user logs out, remove the token from client and redirect to home page */
       logout: function() {
-        delete window.localStorage.smstudiosJwtToken;
+        delete window.localStorage.mealendersJwtToken;
         $state.go('login');
       },
 
@@ -67,7 +67,7 @@
           method: 'GET',
           url: 'api/auth/users',
           params: {
-            token: window.localStorage.smstudiosJwtToken
+            token: window.localStorage.mealendersJwtToken
           }
         }).then(function(res) {
           callback(res.data);
