@@ -7,6 +7,7 @@
     // Componenets
     'loginController',
     'homeController',
+    'dataController',
 
     // Shared
     'authFactory',
@@ -42,6 +43,15 @@
           content: {
             templateUrl: 'app/components/home/home.html',
             controller: 'homeController'
+          }
+        }
+      }).state('data', {
+        url: '/data',
+        authenticate: true,
+        views: {
+          content: {
+            templateUrl: 'app/components/data/data.html',
+            controller: 'dataController'
           }
         }
       });

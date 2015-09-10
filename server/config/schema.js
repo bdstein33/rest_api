@@ -19,7 +19,116 @@ db.knex.schema.hasTable('customers').then(function(exists) {
       customer.date('next_ship_date');
     }).then(function(table) {
       console.log('Created Customer Table');
+
     });
+  }
+});
+
+db.knex.schema.hasTable('items').then(function(exists) {
+  if (!exists) {
+    db.knex.schema.createTable('items', function(item) {
+      item.increments('id').primary();
+      item.string('sku', 75);
+      item.decimal('price', 4, 2);
+      item.string('description', 125);
+    }).then(function(table) {
+      console.log('Created Items Table');
+      new Item({
+        sku: "SOLO_PACK",
+        price: 14.95,
+        description: "One Pouch"
+      }).save();
+      new Item({
+        sku: "1MO",
+        price: 34.95,
+        description: "One Month Bundle"
+      }).save();
+      new Item({
+        sku: "1MOCTY",
+        price: 31.46,
+        description: "One Month Bundle Continuity"
+      }).save();
+      new Item({
+        sku: "3MO",
+        price: 89.95,
+        description: "Three Month Bundle"
+      }).save();
+      new Item({
+        sku: "3MOCTY",
+        price: 80.96,
+        description: "Three Month Bundle Continuity"
+      }).save();
+      new Item({
+        sku: "CHOC_MINT",
+        price: 0.00,
+        description: "Chocolate Mint Pouch"
+      }).save();
+      new Item({
+        sku: "CHOC_MINTCTY-1MO",
+        price: 0.00,
+        description: "Chocolate Mint Pouch"
+      }).save();
+      new Item({
+        sku: "CHOC_MINTCTY-3MO",
+        price: 0.00,
+        description: "Chocolate Mint Pouch"
+      }).save();
+      new Item({
+        sku: "CINN",
+        price: 0.00,
+        description: "Chocolate Mint Pouch"
+      }).save();
+      new Item({
+        sku: "CINNCTY-1MO",
+        price: 0.00,
+        description: "Chocolate Mint Pouch"
+      }).save();
+      new Item({
+        sku: "CINNCTY-3MO",
+        price: 0.00,
+        description: "Chocolate Mint Pouch"
+      }).save();
+      new Item({
+        sku: "CITR",
+        price: 0.00,
+        description: "Chocolate Mint Pouch"
+      }).save();
+      new Item({
+        sku: "CITRCTY-1MO",
+        price: 0.00,
+        description: "Chocolate Mint Pouch"
+      }).save();
+      new Item({
+        sku: "CITRCTY-3MO",
+        price: 0.00,
+        description: "Chocolate Mint Pouch"
+      }).save();
+      new Item({
+        sku: "MOCH",
+        price: 0.00,
+        description: "Chocolate Mint Pouch"
+      }).save();
+      new Item({
+        sku: "MOCHCTY-1MO",
+        price: 0.00,
+        description: "Chocolate Mint Pouch"
+      }).save();
+      new Item({
+        sku: "MOCHCTY-3MO",
+        price: 0.00,
+        description: "Chocolate Mint Pouch"
+      }).save();
+      new Item({
+        sku: "CHOC-4",
+        price: 0.00,
+        description: "4-Piece Sample Pack"
+      }).save();
+      new Item({
+        sku: "CONSUMER_SAMPLE_PACK",
+        price: 0.00,
+        description: "Consumer Sample Pack"
+      }).save();
+    });  
   }
 });
 
@@ -41,19 +150,6 @@ db.knex.schema.hasTable('orders').then(function(exists) {
   }
 });
 
-
-db.knex.schema.hasTable('items').then(function(exists) {
-  if (!exists) {
-    db.knex.schema.createTable('items', function(item) {
-      item.increments('id').primary();
-      item.string('sku', 75);
-      item.float('price', 2);
-      item.string('description', 125);
-    }).then(function(table) {
-      console.log('Created Items Table');
-    });
-  }
-});
 
 db.knex.schema.hasTable('order_items').then(function(exists) {
   if (!exists) {
@@ -85,21 +181,21 @@ db.knex.schema.hasTable('users').then(function(exists) {
 
 // Model declaration
 var Customer = exports.Customer = db.Model.extend({
-  tablename: 'customers',
+  tableName: 'customers',
   order: function() {
     return this.hasMany(Order);
   }
 });
 
 var Item = exports.Item = db.Model.extend({
-  tablename: 'items',
+  tableName: 'items',
   order_item: function() {
     return this.hasMany(OrderItem);
   }
 });
 
 var Order = exports.Order = db.Model.extend({
-  tablename: 'orders',
+  tableName: 'orders',
   customer_id: function() {
     return this.belongsTo(Customer, 'customer_id');
   },
@@ -110,7 +206,7 @@ var Order = exports.Order = db.Model.extend({
 
 
 var OrderItem = exports.OrderItem = db.Model.extend({
-  tablename: 'order_items',
+  tableName: 'order_items',
   order_id: function() {
     return this.belongsTo(Order, 'order_id');
   },

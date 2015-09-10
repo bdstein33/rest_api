@@ -2,6 +2,7 @@ var config = require('./config.js');
 var express = require('express');
 var morgan = require('morgan');
 var bodyParser = require('body-parser');
+require('../models/item.model');
 // var path = require('path');
 
 module.exports = function () {
