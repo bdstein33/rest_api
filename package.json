@@ -1,11 +1,11 @@
 {
-  "name": "mealenders-data",
+  "name": "practice-api",
   "version": "1.0.0",
   "description": "",
   "main": "server/server.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bdstein33/sms-website.git"
+    "url": "git+https://github.com/bdstein33/practice-api"
   },
   "scripts": {
     "start": "nodemon server/server.js"
@@ -14,15 +14,11 @@
   "license": "ISC",
   "devDependencies": {},
   "dependencies": {
-    "bcrypt": "^0.8.5",
-    "bluebird": "^2.9.33",
-    "body-parser": "^1.13.2",
+    "body-parser": "^1.13.3",
     "bookshelf": "^0.8.1",
-    "bower": "^1.4.1",
-    "csv-parse": "^1.0.0",
     "express": "^4.13.3",
-    "jwt-simple": "^0.3.0",
     "knex": "^0.8.6",
-    "morgan": "^1.6.1"
+    "morgan": "^1.6.1",
+    "mysql": "^2.9.0"
   }
 }
