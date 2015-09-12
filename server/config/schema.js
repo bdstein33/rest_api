@@ -9,7 +9,7 @@ db.knex.schema.hasTable('websites').then(function(exists) {
     db.knex.schema.createTable('websites', function(website) {
       website.increments('id').primary();
       website.string('url', 255);
-      website.text('html');
+      website.text('html', 'longtext');
       website.timestamp('last_updated').notNullable().defaultTo(db.knex.raw('now()'));
     }).then(function(table) {
       console.log('Created Website Table');

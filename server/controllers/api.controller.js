@@ -1,35 +1,43 @@
 var Job = require('../models/job.model');
 var Website = require('../models/website.model');
-var helpers = require('../services/helpers');
+var helpers = require('../services/controllerHelpers');
 
+// Adds a new job to database if IP address is under rate limit
 exports.addJob = function(req, res) {
-  var url = req.query.url;
+  // Convert url to standardized format
+  var url = helpers.urlConverter(req.query.url);
+
   var ipAddress = req.connection.remoteAddress;
 
-
+  // First check to see if IP address has a remaining allowance for job requests for this hour
   helpers.IPRateCheck(ipAddress, function(remaining, wait) {
-    if (remaining <= 0) {
+    // If the rate limit has been hit, return error message with wait time until next request can be made
+    if (remaining === 0) {
       res.json({
-        error: "You have exceeded your rate limit, please try again in " + wait.toString() + " seconds.",
-        wait: wait,
-        remaining: remaining
+        message: "You have exceeded your rate limit, please try again in " + wait.toString() + " seconds.",
+        next_job_wait: wait,
+        remaining_requests: 0
       });
+    // Otherwise add job to database
     } else {
-      Job.add({website_id: 1, ip_address: req.connection.remoteAddress}, function(job) {
-        res.json({
-          job_id: job.id,
-          remaining: remaining
+      // First try to add website to database.  If the website already exists, will return the id of existing website id
+      Website.add(url, function(website_id) {
+        // Add job with given website id
+        Job.add({website_id: 1, ip_address: req.connection.remoteAddress}, function(job) {
+          res.json({
+            message: "You're job has been added to the job queue.  You have " + (remaining - 1).toString() + " job requests remaining for this hour.",
+            job_id: job.get('job_id'),
+            remaining_requests: remaining - 1,
+            next_job_wait: wait
+          });
         });
-      });
-      
+      });      
     }
   });
-
-
-
-  // console.log(req.connection.remoteAddress);
-  // Job.add()
-  //create job model
-  // res.json(req.query.url);
 };
 
+
+
+exports.getJobResult = function(req, res) {
+
+};

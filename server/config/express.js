@@ -18,7 +18,6 @@ module.exports = function () {
 
   // Routes 
   require('../routes/api.routes')(app);
-
   
    // Respond with an error to all invalid routes
   app.use(function(req, res) {

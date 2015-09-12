@@ -1,9 +1,8 @@
- var api = require('../controllers/api.controller.js')
+ var api = require('../controllers/api.controller.js');
  module.exports = function(app) {
 
-  app.get('/api/url', api.addJob);
-
-
+  app.get('/api/v1/url', api.addJob);
+  app.get('/api/v1/job', api.getJobResult);
  };
 
 /*

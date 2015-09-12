@@ -14,11 +14,15 @@
   "license": "ISC",
   "devDependencies": {},
   "dependencies": {
+    "bluebird": "^2.10.0",
     "body-parser": "^1.13.3",
     "bookshelf": "^0.8.1",
     "express": "^4.13.3",
+    "express-limiter": "^1.5.0",
     "knex": "^0.8.6",
     "morgan": "^1.6.1",
-    "mysql": "^2.9.0"
+    "mysql": "^2.9.0",
+    "redis": "^1.0.0",
+    "request": "^2.61.0"
   }
 }
