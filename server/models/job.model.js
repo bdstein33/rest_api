@@ -18,7 +18,6 @@ Job.add = function(jobData, callback) {
       Job.add(jobData, callback);
     }
   });
-
 };
 
 // Returns number of requests made in last hour and the time user must wait to make next request from the same IP address
@@ -48,6 +47,18 @@ Job.checkIP = function(ipAddress, callback) {
       callback(results[0][0].requests, secondsUntilNextRequest);
   });
 };
+
+Job.getIncomplete = function(callback) {
+  db.knex.raw(' \
+    SELECT \
+      job_id \
+    FROM jobs \
+    WHERE completed = false \
+    ORDER BY created_at DESC')
+  .then(function(results) { 
+    callback(results[0]);
+  });
+}
 
 // This function returns a random ID that is 10 characters long
 // Credit: https://gist.github.com/gordonbrander/2230317

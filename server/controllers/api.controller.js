@@ -1,6 +1,7 @@
 var Job = require('../models/job.model');
 var Website = require('../models/website.model');
 var helpers = require('../services/controllerHelpers');
+var jobQueue = require('../services/jobQueue');
 
 // Adds a new job to database if IP address is under rate limit
 exports.addJob = function(req, res) {
@@ -24,11 +25,13 @@ exports.addJob = function(req, res) {
       Website.add(url, function(website_id) {
         // Add job with given website id
         Job.add({website_id: 1, ip_address: req.connection.remoteAddress}, function(job) {
+          jobQueue.addToQueue(job.job_id);
           res.json({
             message: "You're job has been added to the job queue.  You have " + (remaining - 1).toString() + " job requests remaining for this hour.",
             job_id: job.get('job_id'),
             remaining_requests: remaining - 1,
-            next_job_wait: wait
+            next_job_wait: wait,
+            queue: jobQueue.queueLength()
           });
         });
       });      
