@@ -41,7 +41,7 @@ Website.fetchData = function(website_id, callback) {
         website.set('last_updated', new Date());
         website.save();
 
-        callback(website.get('html'));
+        callback();
       });
     }
   });

@@ -24,14 +24,13 @@ exports.addJob = function(req, res) {
       // First try to add website to database.  If the website already exists, will return the id of existing website id
       Website.add(url, function(website_id) {
         // Add job with given website id
-        Job.add({website_id: 1, ip_address: req.connection.remoteAddress}, function(job) {
-          jobQueue.addToQueue(job.job_id);
+        Job.add({website_id: website_id, ip_address: req.connection.remoteAddress}, function(job) {
+          jobQueue.addToQueue(job.get('job_id'));
           res.json({
             message: "You're job has been added to the job queue.  You have " + (remaining - 1).toString() + " job requests remaining for this hour.",
             job_id: job.get('job_id'),
             remaining_requests: remaining - 1,
-            next_job_wait: wait,
-            queue: jobQueue.queueLength()
+            next_job_wait: wait
           });
         });
       });      
@@ -40,7 +39,22 @@ exports.addJob = function(req, res) {
 };
 
 
-
+// Returns HTML from job request or a 404 if job_id is invalid
 exports.getJobResult = function(req, res) {
-
+  Job.getResult(req.query.id, function(err, result) {
+    // If job id doesn't exist, return 404
+    if (err) {
+      res.status(404);
+      res.json("Invalid job id");
+    } else {
+      // If job is found but is not completed, return
+      if (!result.completed) {
+        delete result.html;
+        result.message = "Job " + result.job_id + " has not been completed yet.  Please try again soon.";
+      }
+      delete result.completed;
+      res.json(result);
+    }
+    
+  });
 };

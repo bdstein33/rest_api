@@ -1,5 +1,6 @@
 var db = require('../config/db');
 var Job = require('../config/schema').Job;
+var Website = require('../models/website.model');
 var helpers = require('../services/modelHelpers');
 
 // Adds job to database with a unique job_id
@@ -58,12 +59,44 @@ Job.getIncomplete = function(callback) {
   .then(function(results) { 
     callback(results[0]);
   });
-}
+};
+
+Job.executeJob = function(job_id, callback) {
+  new Job({job_id: job_id})
+    .fetch()
+    .then(function(job) {
+      Website.fetchData(job.get('website_id'), function() {
+        job.set('completed', true);
+        job.save();
+        callback();
+      });
+    });
+};
 
 // This function returns a random ID that is 10 characters long
 // Credit: https://gist.github.com/gordonbrander/2230317
 var generateID = function () {
   return Math.random().toString(36).substr(2, 10).toUpperCase();
 };
+
+// Returns 
+Job.getResult = function(job_id, callback) {
+  db.knex.raw(' \
+    SELECT \
+      jobs.job_id AS job_id, \
+      websites.html AS html, \
+      jobs.completed AS completed \
+    FROM jobs, websites \
+    WHERE jobs.website_id = websites.id \
+    AND job_id = "'+ job_id + '"')
+  .then(function(results) { 
+
+    if (results[0].length === 0) {
+      return callback(true);
+    }
+    callback(false, results[0][0]);
+  });
+};
+
 
 module.exports = Job;
