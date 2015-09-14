@@ -14,7 +14,6 @@
   "license": "ISC",
   "devDependencies": {},
   "dependencies": {
-    "bluebird": "^2.10.0",
     "body-parser": "^1.13.3",
     "bookshelf": "^0.8.1",
     "express": "^4.13.3",

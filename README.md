@@ -1,7 +1,13 @@
 # Ben's Practice API 
 
+### Contents
 
-### Overview
+##### 1. Overview
+##### 2. Set Up/Installation
+##### 3. API Documentation
+##### 4. Rate Limiting Guidelines
+
+### 1. Overview
 
 This API to enables users to fetch the HTML contents of a specified url.  When users submit a url to the /url endpoint, they are provided a job id and their job as added to a job queue
 
@@ -11,12 +17,27 @@ Users send GET requests to /api/url/ endpoint which returns a job_id.
 
 Users send GET requests to /api/job which returns html of url submitted in initial request to /api/url
 
+### 2. Set Up/Installation
 
-### API Documentation
+1. Create a MySQL database on your server's MySQL host.  
 
-#### Create new Job
+2. Go to /server/config/env folder and rename development_placeholder.js to development.js.
 
-#### /api/v1/:url
+2. Add in the following variables to establish connection to your newly created database:
+- process.env.DB_HOSTNAME - database hostname (127.0.0.1 if locally run instance of MySQL)
+- process.env.DB_USERNAME - MySQL username
+- process.env.DB_PASSWORD - MySQL password
+- process.env.DB_NAME - MySQL database name (probably the one you just created)
+
+3. Open server's root file path in terminal and type 'npm install' to install the packages this module depends on
+
+4. To start server, type 'npm start' from server's root file path.  Note: this will only work if you have nodemon installed ('npm install nodemon -save -g').  If you prefer not to use nodemon, you can start server by typing 'node server/server.js'
+
+### 3. API Documentation
+
+##### Create new Job
+
+##### /api/v1/:url
 
 Example: /api/v1/www.google.com
 
@@ -49,9 +70,9 @@ Note: url cannot start with "http://" or "https://". Valid url formats include: 
 
 
 
-#### Get status/results of job
+##### Get status/results of job
 
-#### /api/v1/job/:job_id
+##### /api/v1/job/:job_id
 
 Example: /api/v1/job/FAKEJOBID1
 
@@ -80,16 +101,19 @@ If the job has not been completed yet, the response looks like this:
 ```
 {
   "job_id": "FAKEJOBID1",
-  "message": "Job  has not been completed yet.  Please try again soon."
+  "message": "Job has not been completed yet.  Please try again soon."
   "url": "http://www.cnn.com"
 }
 ```
 
 Note: the job id is provided in the response from requests made to /api/v1/:url
 
+### 4. Rate Limiting
 
-### Rate Limiting
+To prevent people from abusing the API, each IP address is limited to creating a maximum number of job requests (request to /api/v1/:url) per hour. This amount is set by the global process.env.REQUEST_LIMIT variable in the /server/config/env/development.js file. Feel free to change this variable to suite the needs of your server's usage.  The number of jobs requests remaining for a given IP address in the upcoming hour are included in the HTTP response when a new job is created.
 
-To prevent people from abusing the API, each IP address is limited to creating a maximum of 60 job requests per hour.  The number of jobs requests remaining for a given hour are included in the HTTP response when a new job is created.
+Limited IP addresses are stored in an object in the /server/services/jobQueue.js file.  When users have zero requests remaining, their IP address is added to an object called limitedIPAddresses where the key is equal to the users' IP address and the value is the time at which they are eligible to make new job request.  When a user makes a request to /api/v1/:url, the server checks to see if the user's IP address is a key in this object.  If it isn't it means that the user is still under the limit.  If the user's IP address is a key in limitedIPAddresses, the server checks to see if the value (a time value that represents when the user is eligible to make additional requests) has already passed.  If this time is in the past, the user's IP address key value pair is removed from the object and the request is allowed.  If the IP addresses's time value is in the future, it means that the user is still subject to the rate limit.
+
+One problem with storing this object in local memory, is that there is no persistence if the server restarts.  The job queue (which handles the processing of pending jobs) is subject to the same problem.  To solve this problem, when the server turns on, I run two functions that populate the limitedIPAddresses object with any IP addresses that are currently at the rate limit and the job queue with any pending jobs.
 
  
