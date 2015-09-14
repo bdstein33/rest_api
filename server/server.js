@@ -11,16 +11,3 @@
   app.listen(process.env.PORT, host);
   module.exports = app;
   console.log('Server running at port: ' + process.env.PORT);
-
-// exports.createJob = function() {
-
-// };
-
-// exports.addWebsite = function() {
-
-// };
-
-
-// exports.fetchWebsiteHTML = function(url) {
-
-// };

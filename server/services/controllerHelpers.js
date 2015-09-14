@@ -9,6 +9,7 @@ exports.IPRateCheck = function(ipAddress, callback) {
 };
 
 // Standardizes a url by ensuring it begins with http://www. or https://www.
+// Note: current routes cannot accept urls that begin with http:// or https:// but I left the functionality for these strings in place in case we enable users to pass in parameters in future versons of the API
 exports.urlConverter = function(string) {
   // If url begins with www., add http:// to the beginning
   if (/^www./i.test(string)) {

@@ -5,10 +5,12 @@ var helpers = require('../services/modelHelpers');
 
 // Adds job to database with a unique job_id
 Job.add = function(jobData, callback) {
-  jobData.job_id = generateID();
+  // Create a randomly generated ID
+  jobData.job_id = exports.generateID();
   new Job({job_id: jobData.job_id})
   .fetch()
   .then(function(job) {
+    // If no job exists with this job_id, create a new job with this job_id
     if (!job) {
       new Job(jobData)
       .save()
@@ -18,12 +20,13 @@ Job.add = function(jobData, callback) {
         });
       });
     } else {
+      // If a job already exists with the randomly generated job_id, run this function again.  The function keeps running until a unique job_id is created
       Job.add(jobData, callback);
     }
   });
 };
 
-// Returns number of requests made in last hour and the time user must wait to make next request from the same IP address
+// Returns number of requests the user has remaining in the next hour and the number of seconds the user must wait to make next request from the same IP address.  The wait time will equal zero unles the user has hit the hourly API rate limit.
 Job.checkIP = function(ipAddress, callback) {
   //Retrieves count and oldest time of all requests made from IP address in the past hour
   db.knex.raw(' \
@@ -51,6 +54,7 @@ Job.checkIP = function(ipAddress, callback) {
   });
 };
 
+// Returns all of the jobs that are not completed.  This is used to populate the jobQueue when the server starts.
 Job.getIncomplete = function(callback) {
   db.knex.raw(' \
     SELECT \
@@ -63,6 +67,7 @@ Job.getIncomplete = function(callback) {
   });
 };
 
+// This function fetches the data for a given url (if it needs to be fetched) and marks a job as complete.
 Job.executeJob = function(job_id, callback) {
   new Job({job_id: job_id})
     .fetch()
@@ -75,13 +80,7 @@ Job.executeJob = function(job_id, callback) {
     });
 };
 
-// This function returns a random ID that is 10 characters long
-// Credit: https://gist.github.com/gordonbrander/2230317
-var generateID = function () {
-  return Math.random().toString(36).substr(2, 10).toUpperCase();
-};
-
-// Returns 
+// Returns the results of a job request.  
 Job.getResult = function(job_id, callback) {
   db.knex.raw(' \
     SELECT \

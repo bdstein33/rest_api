@@ -1,7 +1,7 @@
 var db = require('./db');
 
 //////////////////////////////////////////////
-/// SCHEMA DEFINITIONS
+/// Schema Definitions
 //////////////////////////////////////////////
 
 db.knex.schema.hasTable('websites').then(function(exists) {
@@ -34,7 +34,7 @@ db.knex.schema.hasTable('jobs').then(function(exists) {
 });
 
 //////////////////////////////////////////////
-/// MODEL DEFINITIONS
+/// Model Definitions
 //////////////////////////////////////////////
 
 var Website = exports.Website = db.Model.extend({

@@ -1,4 +1,6 @@
 process.env.PORT = 8000;
+
+// MySQL connection information
 process.env.DB_HOSTNAME = 'ADD HOSTNAME';
 process.env.DB_USERNAME = 'ADD USERNAME';
 process.env.DB_PASSWORD = 'ADD USERNAME';

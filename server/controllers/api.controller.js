@@ -30,7 +30,7 @@ exports.addJob = function(req, res) {
           }
 
           res.json({
-            message: "You're job has been added to the job queue.  You have " + (remaining).toString() + " job request(s) remaining for this hour.",
+            message: "You're job has been added to the job queue. You have " + (remaining).toString() + " job request(s) remaining for this hour.",
             job_id: job.get('job_id'),
             remaining_requests: remaining
           });
@@ -43,7 +43,9 @@ exports.addJob = function(req, res) {
 
 // Returns HTML from job request or a 404 if job_id is invalid
 exports.getJobResult = function(req, res) {
-  Job.getResult(req.params.job_id, function(err, result) {
+  var job_id = req.params.job_id;
+
+  Job.getResult(job_id, function(err, result) {
     // If job id doesn't exist, return 404
     if (err) {
       res.status(404);
@@ -52,7 +54,7 @@ exports.getJobResult = function(req, res) {
       // If job is found but is not completed, return
       if (!result.completed) {
         delete result.html;
-        result.message = "Job " + result.job_id + " has not been completed yet.  Please try again soon.";
+        result.message = "Job " + result.job_id + " has not been completed yet. Please try again soon.";
       }
       delete result.completed;
       res.json(result);

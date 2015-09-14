@@ -1,5 +1,10 @@
 var Job = require('../models/job.model');
 
+
+/////////////////////////////////////////////
+/// Job Queue
+/////////////////////////////////////////////
+
 // Represents whether jobQueue is currently being worked through
 var queueIsActive = false;
 var Queue = function() {
@@ -48,8 +53,10 @@ var startQueue = function() {
   }());
 };
 
+/////////////////////////////////////////////
+/// Initialization
+/////////////////////////////////////////////
 
-// Initialization functions
 // When the server starts up, create a jobQueue and fill it with any incomplete jobs in the database
 var jobQueue = new Queue();
 
@@ -66,6 +73,10 @@ Job.getIncomplete(function(jobs) {
 Job.getLimitedIPs(function(result) {
   limitedIPAddresses = result;
 });
+
+/////////////////////////////////////////////
+/// Functions used in other files
+/////////////////////////////////////////////
 
 exports.addToLimitList = function(ipAddress, time) {
   limitedIPAddresses[ipAddress] = time;
