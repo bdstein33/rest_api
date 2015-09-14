@@ -6,7 +6,7 @@ var helpers = require('../services/modelHelpers');
 // Adds job to database with a unique job_id
 Job.add = function(jobData, callback) {
   // Create a randomly generated ID
-  jobData.job_id = exports.generateID();
+  jobData.job_id = helpers.generateID();
   new Job({job_id: jobData.job_id})
   .fetch()
   .then(function(job) {
