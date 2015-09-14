@@ -13,7 +13,9 @@ Job.add = function(jobData, callback) {
       new Job(jobData)
       .save()
       .then(function(job) {
-        callback(job);
+        Job.checkIP(job.get('ip_address'), function(remaining, wait) {
+          callback(job, remaining, wait);
+        });
       });
     } else {
       Job.add(jobData, callback);
@@ -33,19 +35,19 @@ Job.checkIP = function(ipAddress, callback) {
     AND created_at > CURRENT_TIMESTAMP - INTERVAL 1 HOUR \
     ORDER BY created_at DESC')
   .then(function(results) {
-    var requestcount = results[0][0];
+    var requestCount = results[0][0].requests;
+
     var secondsUntilNextRequest = 0;
-    // If one less than max requests have been made within the last 60 minutes, determine in how many seconds the next request can be made after this one (we subtract 1 from REQUEST LIMIT to account for the fact that we are about to add one more request)
-    if (results[0][0].requests >= process.env.REQUEST_LIMIT - 1) {
+    // If the max number of requests have been made within the last 60 minutes, determine in how many seconds the next request can be made after this one 
+    if (requestCount === parseInt(process.env.REQUEST_LIMIT)) {
       // Find how many seconds ago the oldest request made in the past hour was made
       var timeDiff = helpers.timeDiff(results[0][0].oldest_request);
       // Math.ceil((new Date().getTime() - results[0][0].oldest_request.getTime())/1000);
       // Subtract this from the number of seconds in an hour to determine when next request can be made
       secondsUntilNextRequest = 60 * 60 - timeDiff;
-
     }
-      // Add one to requests made because the query results don't include the job that was just added
-      callback(results[0][0].requests, secondsUntilNextRequest);
+
+    callback(parseInt(process.env.REQUEST_LIMIT) - requestCount, secondsUntilNextRequest);
   });
 };
 
@@ -85,6 +87,7 @@ Job.getResult = function(job_id, callback) {
     SELECT \
       jobs.job_id AS job_id, \
       websites.html AS html, \
+      websites.url AS url, \
       jobs.completed AS completed \
     FROM jobs, websites \
     WHERE jobs.website_id = websites.id \
@@ -98,5 +101,29 @@ Job.getResult = function(job_id, callback) {
   });
 };
 
+// Fetches list of IP addresses that are currently at their API rate limit as well as the time that they free up.
+Job.getLimitedIPs = function(callback) {
+  db.knex.raw(' \
+    SELECT \
+      ip_address, \
+      COUNT(ip_address) AS requests, \
+      MIN(created_at) AS oldest_request \
+    FROM jobs \
+    WHERE created_at > CURRENT_TIMESTAMP - INTERVAL 1 HOUR \
+    GROUP BY ip_address \
+    HAVING REQUESTS >= ' + process.env.REQUEST_LIMIT.toString())
+  .then(function(results) { 
+    // Return an object where the keys are IP address that have hit the rate limit and the values are the time at which they can make a new request
+    var resultsObj = {};
+    var date;
+
+    // For each IP address that is on the wait list, add key value pair to object where the IP address is the key and the time at which the IP can start making requests again is the value
+    for (var i = 0; i < results[0].length; i++) {
+      resultsObj[results[0][i].ip_address] = helpers.hourLater(new Date(results[0][i].oldest_request));
+    }
+    callback(resultsObj);
+  });
+
+};
 
 module.exports = Job;

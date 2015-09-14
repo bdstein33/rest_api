@@ -1,8 +1,9 @@
  var api = require('../controllers/api.controller.js');
  module.exports = function(app) {
 
-  app.get('/api/v1/url', api.addJob);
-  app.get('/api/v1/job', api.getJobResult);
+  app.get('/api/v1/url/:url', api.addJob);
+  app.get('/api/v1/job/:job_id', api.getJobResult);
+
  };
 
 /*
@@ -10,8 +11,6 @@
 
  The user asks for the status of the job id and if the job is complete, he gets a response that includes the HTML for www.google.com
  */
-
-
 
 //When initial GET request is made, check to make sure that less than 60 jobs have been created by IP address in last hour
 

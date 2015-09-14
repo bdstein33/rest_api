@@ -36,3 +36,9 @@ exports.urlConverter = function(string) {
     return "http://www." + string;
   }
 };
+
+// Returns new date that is a given number of seconds later than the start date.  If startDate is not provided, it defaults to now
+exports.laterDate = function(secondsLater, startDate) {
+  startDate = startDate || new Date();
+  return new Date(startDate.setSeconds(startDate.getSeconds() + secondsLater));
+};
