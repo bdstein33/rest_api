@@ -12,25 +12,25 @@ Please contact Ben Steinberg (bdstein33@gmail.com) with any questions.
 
 ### 1. Overview
 
-This API to enables users to fetch the HTML contents of a specified url.  When users submit a url to the /url endpoint, they are provided a job id and their job as added to a job queue
+This API enables users to fetch the HTML contents of a specified url.  When users submit a url to the /api/v1/:url endpoint, they are provided a job id and their job is added to a job queue.
 
-When users submit job_id to the /job endpoint, the HTML from the url associated with that job is retrieved.  If the url provided when the job was created is invalid or the job has not been completed yet, this will be returned instead of the HTML.
+When users submit a job id to the /api/v1/job/:job_id endpoint, the HTML from the url associated with that job is retrieved.  If the url provided when the job was created is invalid or the job has not been completed yet, this will be returned instead of the HTML.
 
-Users send GET requests to /api/url/ endpoint which returns a job_id.
+Users send GET requests to /api/v1/:url endpoint which returns a job_id.
 
-Users send GET requests to /api/job which returns html of url submitted in initial request to /api/url
+Users send GET requests to /api/v1/job/:job_id which returns html of url submitted in initial request to /api/url
 
 ### 2. Set Up/Installation
 
-1. Create a MySQL database on your server's MySQL host.  
+1. Create a MySQL database on your MySQL server.  
 
 2. Go to /server/config/env folder and rename development_placeholder.js to development.js.
 
 2. Add in the following variables to establish connection to your newly created database:
-- process.env.DB_HOSTNAME - database hostname (127.0.0.1 if locally run instance of MySQL)
-- process.env.DB_USERNAME - MySQL username
-- process.env.DB_PASSWORD - MySQL password
-- process.env.DB_NAME - MySQL database name (probably the one you just created)
+  - process.env.DB_HOSTNAME - database hostname (127.0.0.1 if locally run instance of MySQL)
+  - process.env.DB_USERNAME - MySQL username
+  - process.env.DB_PASSWORD - MySQL password
+  - process.env.DB_NAME - MySQL database name (probably the one you just created)
 
 3. Open server's root file path in terminal and type 'npm install' to install the packages this module depends on
 
