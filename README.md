@@ -1,11 +1,14 @@
 # Ben's Practice API 
 
+Please contact Ben Steinberg (bdstein33@gmail.com) with any questions.
+
 ### Contents
 
 ##### 1. Overview
 ##### 2. Set Up/Installation
 ##### 3. API Documentation
 ##### 4. Rate Limiting Guidelines
+##### 5. Customizing Server
 
 ### 1. Overview
 
@@ -116,4 +119,12 @@ Limited IP addresses are stored in an object in the /server/services/jobQueue.js
 
 One problem with storing this object in local memory, is that there is no persistence if the server restarts.  The job queue (which handles the processing of pending jobs) is subject to the same problem.  To solve this problem, when the server turns on, I run two functions that populate the limitedIPAddresses object with any IP addresses that are currently at the rate limit and the job queue with any pending jobs.
 
- 
+### 5. Customizing Server
+
+Two global variables located in /server/config/env/development.js can be modified to alter server functionality: process.env.REQUEST_LIMIT, process.env.URL_REFRESH_TIME.
+
+To better handle traffic, I implemented rate limiting (as discussed above).  The maximum number of requests that IP addresses are allowed to make per hour is controlled by the process.env.REQUEST_LIMIT variable in the /server/config/env/development.js file.  If you change the value of this variable, you can alter the number of requests a given IP address is allowed to make.
+
+I also implemented a minimum url refresh time, represented by process.env.URL_REFRESH_TIME.  The minimum url refresh time enables the server to process more job requests by only making a request to a pending job's url if a request has not been made to the same url within a specified number of seconds (the default is 300 seconds, or 5 minutes).  As an example, a job is created with a url of www.google.com and the HTML of this job is fetched at 3:00pm.  Another job is processed at 3:02pm (two minutes later on the same day) with the same url (www.google.com).  Since this HTML of this url has been fetched less than 300 seconds ago, the server will make the job complete without actually making a request to the job's url.  Feel free to change this variable as well.
+
+Note: If you change these environmental variables while the server is running, I recommend restarting the server to avoid and issues.  In particular, if a user has hit the rate limit and you up the maximum number of allowable hourly requests, this user's IP address will still be a key in the limitedIPAddresses object.  
