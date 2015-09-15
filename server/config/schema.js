@@ -12,6 +12,7 @@ db.knex.schema.hasTable('websites').then(function(exists) {
       website.text('html', 'longtext');
       website.timestamp('last_updated').notNullable().defaultTo(db.knex.raw('now()'));
     }).then(function(table) {
+      console.log("Expected Error: ER_NO_SUCH_TABLE.  Explanation in sever/config/schema.js"); // See below
       console.log('Created Website Table');
     });
   }
@@ -36,7 +37,10 @@ db.knex.schema.hasTable('jobs').then(function(exists) {
 /// Model Definitions
 //////////////////////////////////////////////
 
-// Note: The first time you run the application, you might get an error: Unhandled rejection Error: ER_NO_SUCH_TABLE.  This error is raised when the application is run for the first time because it takes time for the tables to be created in the MySQL databse and the models are declared before the tables are complete.  If I put the model declarations in the .then function fo the schema definitions, other files that depend on these models will raise different errors.  Although this is not ideal, it does not cause any functionality errors and the error is not raised after tables have been created.
+/* 
+Note: The first time you run the application, you will get an error: Unhandled rejection Error: ER_NO_SUCH_TABLE. The source of this error is the initialization section of /server/services/jobQueue.js. When the server is started, the initialization functions attempt to fetch data from the database to populate the job queue and the object that contains IP addresses that are currently at the api rate limit.  Because the tables are created asynchronously, these functions try to pull data from tabels that don't yet exist.  
+Although this is not ideal, these errors don't cause any functionality errors and the error is only raised when the tables are being created.
+ */
 
 var Website = exports.Website = db.Model.extend({
   tableName: 'websites',
@@ -51,4 +55,3 @@ var Job = exports.Job = db.Model.extend({
     return this.belongsTo(Website, 'website_id');
   }
 });
-
