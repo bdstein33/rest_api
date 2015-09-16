@@ -1,5 +1,6 @@
 var Job = require('../models/job.model');
-
+var Website = require('../models/website.model');
+var helpers = require('../services/modelHelpers');
 
 /////////////////////////////////////////////
 /// Job Queue
@@ -37,13 +38,28 @@ Queue.prototype.size = function() {
 };
 
 // This function runs through and completes the incomplete jobs.  If there are no more jobs, queueIsActive is set to false
+// var startQueue = function() {
+//   queueIsActive = true;
+//   (function loop() {
+//     // If there are any jobs remaining in the queue, execute that job then loop on to the next
+//     if (jobQueue.size() > 0) {
+//       var id = jobQueue.dequeue();
+//       Job.executeJob(id, function() {
+//         loop();
+//       });
+//     // Once the queue is empty, stop looping through
+//     } else {
+//       queueIsActive = false;
+//     }
+//   }());
+// };
 var startQueue = function() {
   queueIsActive = true;
   (function loop() {
     // If there are any jobs remaining in the queue, execute that job then loop on to the next
     if (jobQueue.size() > 0) {
       var id = jobQueue.dequeue();
-      Job.executeJob(id, function() {
+      executeJob(id, function() {
         loop();
       });
     // Once the queue is empty, stop looping through
@@ -51,6 +67,86 @@ var startQueue = function() {
       queueIsActive = false;
     }
   }());
+};
+
+
+
+// This function fetches the data for a given url (if it needs to be fetched) and marks a job as complete.
+var executeJob = function(job_id, callback) {
+  new Job({job_id: job_id})
+    .fetch()
+    .then(function(job) {
+      fetchWebsiteHTML(job.get('website_id'), function() {
+        job.set('completed', true);
+        job.save();
+        callback();
+      });
+    });
+};
+
+// Fetch new HTML for a given website if the HTML has not been fetch recently (as defined by global URL_REFRESH_TIME variable)
+fetchWebsiteHTML = function(website_id, callback) {
+  // Fetch website form database
+  new Website({id: website_id})
+  .fetch()
+  .then(function(website) {
+    // If website's HTML has been fetched within the last hour, return this HTML
+    if (!!(website.get('html')) && helpers.timeDiff(website.get('last_updated')) < process.env.URL_REFRESH_TIME) {
+      callback(website.get('html'));
+    // Otherwise the HTML hasn't been fetched or it's old, so we fetch again
+    } else {
+      // Make HTTP request to URL
+      fetchHTML(website.get('url'), function(error, html) {
+        // If there is an error fetching the HTML, the URL must be invalid.  Either way, set new HTML or error message as the value in the html column
+        if (error) {
+          website.set('html', 'Invalid url');
+        } else {
+          website.set('html', html);
+        }
+        // Update last_updated time to now
+        website.set('last_updated', new Date());
+        website.save();
+
+        callback();
+      });
+    }
+  });
+};
+
+
+// var request = require('request');
+var http = require("http");
+
+// Fetches HTML from the provided url
+var fetchHTML = function(url, callback) {
+
+  // First make get request to make sure the url is valid
+  http.get(url, function(res) {
+    // If url is valid, request HTML contents
+    http.request(url, function(res) {
+      var html = '';
+      // Keep adding chunks until binary size of html string has exceeded the max file size
+      res.on('data', function (chunk) {
+        html += chunk;
+        if (getBinarySize(html) > process.env.MAX_FILE_SIZE) {
+          console.log("TOO BIG");
+          callback(null, html);
+          res.abort();
+        }
+      });
+      res.on('end', function() {
+        console.log('SUCCESSFUL COMPLETE');
+        callback(null, html);
+      });
+      
+    }).end();
+  }).on('error', function (err) {
+    callback(true);
+  });
+};
+
+var getBinarySize = function(string) {
+    return Buffer.byteLength(string, 'utf8');
 };
 
 /////////////////////////////////////////////

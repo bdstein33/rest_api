@@ -16,3 +16,9 @@ Example if URL+REFRESH_TIME = 60 * 60: User 1 makes a job for http://google.com 
 
 Having a minimum refresh time helps ensure that we won't hit rate limits of other APIs.*/
 process.env.URL_REFRESH_TIME = 60 * 5;
+
+// Limits the max number of bytes a string can be from downloaded file before request is terminated
+process.env.MAX_FILE_SIZE = 10000000;
+// 1000000000B = 1 GB
+// 1000000B = 1 MB
+// 1000B = 1 KB
