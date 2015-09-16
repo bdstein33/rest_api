@@ -1,3 +1,4 @@
+var http = require("http");
 var Job = require('../models/job.model');
 var Website = require('../models/website.model');
 var helpers = require('../services/modelHelpers');
@@ -38,21 +39,6 @@ Queue.prototype.size = function() {
 };
 
 // This function runs through and completes the incomplete jobs.  If there are no more jobs, queueIsActive is set to false
-// var startQueue = function() {
-//   queueIsActive = true;
-//   (function loop() {
-//     // If there are any jobs remaining in the queue, execute that job then loop on to the next
-//     if (jobQueue.size() > 0) {
-//       var id = jobQueue.dequeue();
-//       Job.executeJob(id, function() {
-//         loop();
-//       });
-//     // Once the queue is empty, stop looping through
-//     } else {
-//       queueIsActive = false;
-//     }
-//   }());
-// };
 var startQueue = function() {
   queueIsActive = true;
   (function loop() {
@@ -114,39 +100,32 @@ fetchWebsiteHTML = function(website_id, callback) {
 };
 
 
-// var request = require('request');
-var http = require("http");
 
 // Fetches HTML from the provided url
 var fetchHTML = function(url, callback) {
 
   // First make get request to make sure the url is valid
   http.get(url, function(res) {
-    // If url is valid, request HTML contents
-    http.request(url, function(res) {
-      var html = '';
-      // Keep adding chunks until binary size of html string has exceeded the max file size
-      res.on('data', function (chunk) {
-        html += chunk;
-        if (getBinarySize(html) > process.env.MAX_FILE_SIZE) {
-          console.log("TOO BIG");
+    
+    // If response header doesn't have content-length value or has content-length value that is of valid size
+    if (!res.headers['content-length'] || res.headers['content-length'] <= process.env.MAX_FILE_SIZE) {
+      request(url, function(error, response, html) {
+        if (!error) {
           callback(null, html);
-          res.abort();
+        } else {
+          callback(true);
         }
       });
-      res.on('end', function() {
-        console.log('SUCCESSFUL COMPLETE');
-        callback(null, html);
-      });
+    }
       
-    }).end();
+  // If url is not valid, return true for error
   }).on('error', function (err) {
     callback(true);
   });
 };
 
 var getBinarySize = function(string) {
-    return Buffer.byteLength(string, 'utf8');
+  return Buffer.byteLength(string, 'utf8');
 };
 
 /////////////////////////////////////////////

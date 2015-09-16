@@ -67,19 +67,6 @@ Job.getIncomplete = function(callback) {
   });
 };
 
-// This function fetches the data for a given url (if it needs to be fetched) and marks a job as complete.
-Job.executeJob = function(job_id, callback) {
-  new Job({job_id: job_id})
-    .fetch()
-    .then(function(job) {
-      Website.fetchData(job.get('website_id'), function() {
-        job.set('completed', true);
-        job.save();
-        callback();
-      });
-    });
-};
-
 // Returns the results of a job request.  
 Job.getResult = function(job_id, callback) {
   db.knex.raw(' \
