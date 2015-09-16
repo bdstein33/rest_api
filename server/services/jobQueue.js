@@ -1,7 +1,8 @@
-var http = require("http");
+var http = require('http');
+var request = require('request');
 var Job = require('../models/job.model');
 var Website = require('../models/website.model');
-var helpers = require('../services/modelHelpers');
+var helpers = require('../services/timeHelpers');
 
 /////////////////////////////////////////////
 /// Job Queue
@@ -44,8 +45,8 @@ var startQueue = function() {
   (function loop() {
     // If there are any jobs remaining in the queue, execute that job then loop on to the next
     if (jobQueue.size() > 0) {
-      var id = jobQueue.dequeue();
-      executeJob(id, function() {
+      var job_id = jobQueue.dequeue();
+      executeJob(job_id, function() {
         loop();
       });
     // Once the queue is empty, stop looping through
@@ -71,7 +72,7 @@ var executeJob = function(job_id, callback) {
 };
 
 // Fetch new HTML for a given website if the HTML has not been fetch recently (as defined by global URL_REFRESH_TIME variable)
-fetchWebsiteHTML = function(website_id, callback) {
+var fetchWebsiteHTML = function(website_id, callback) {
   // Fetch website form database
   new Website({id: website_id})
   .fetch()
@@ -82,7 +83,7 @@ fetchWebsiteHTML = function(website_id, callback) {
     // Otherwise the HTML hasn't been fetched or it's old, so we fetch again
     } else {
       // Make HTTP request to URL
-      fetchHTML(website.get('url'), function(error, html) {
+      requestHTML(website.get('url'), function(error, html) {
         // If there is an error fetching the HTML, the URL must be invalid.  Either way, set new HTML or error message as the value in the html column
         if (error) {
           website.set('html', 'Invalid url');
@@ -99,17 +100,13 @@ fetchWebsiteHTML = function(website_id, callback) {
   });
 };
 
-
-
 // Fetches HTML from the provided url
-var fetchHTML = function(url, callback) {
-
+var requestHTML = function(url, callback) {
   // First make get request to make sure the url is valid
   http.get(url, function(res) {
-    
     // If response header doesn't have content-length value or has content-length value that is of valid size
     // We check to see if the header does not have a content-length value because response might use transfer encoding instead
-    if (!res.headers['content-length'] || res.headers['content-length'] <= process.env.MAX_FILE_SIZE) {
+    if (!res.headers['content-length'] || parseInt(res.headers['content-length']) <= process.env.MAX_FILE_SIZE) {
       request(url, function(error, response, html) {
         if (!error) {
           callback(null, html);

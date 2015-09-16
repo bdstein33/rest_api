@@ -1,12 +1,12 @@
 var db = require('../config/db');
 var Job = require('../config/schema').Job;
 var Website = require('../models/website.model');
-var helpers = require('../services/modelHelpers');
+var helpers = require('../services/timeHelpers');
 
 // Adds job to database with a unique job_id
 Job.add = function(jobData, callback) {
   // Create a randomly generated ID
-  jobData.job_id = helpers.generateID();
+  jobData.job_id = generateID();
   new Job({job_id: jobData.job_id})
   .fetch()
   .then(function(job) {
@@ -113,3 +113,9 @@ Job.getLimitedIPs = function(callback) {
 };
 
 module.exports = Job;
+
+// This function returns a random ID that is 10 characters long
+// Credit: https://gist.github.com/gordonbrander/2230317
+var generateID = function () {
+  return Math.random().toString(36).substr(2, 10).toUpperCase();
+};
