@@ -108,6 +108,7 @@ var fetchHTML = function(url, callback) {
   http.get(url, function(res) {
     
     // If response header doesn't have content-length value or has content-length value that is of valid size
+    // We check to see if the header does not have a content-length value because response might use transfer encoding instead
     if (!res.headers['content-length'] || res.headers['content-length'] <= process.env.MAX_FILE_SIZE) {
       request(url, function(error, response, html) {
         if (!error) {
